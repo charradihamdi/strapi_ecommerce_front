@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Stack, ToggleButton, ToggleButtonGroup, IconButton } from '@mui/material';
-import { AddShoppingCartOutlined, Add, Remove } from '@mui/icons-material';
+import { Box, Typography, Button, Stack, ToggleButton, ToggleButtonGroup, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { AddShoppingCartOutlined, Add, Remove, Close } from '@mui/icons-material';
 import Cart from './Cart'; // Import the Cart component
 
-const ProductDetails = ({ clickedProduct }) => {
+const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishShopping }) => {
     const [selectedImg, setSelectedImg] = useState(0);
     const [quantity, setQuantity] = useState(1);
-    const [showCart, setShowCart] = useState(false);
     const [cartItems, setCartItems] = useState([]);
+    const [currentStep, setCurrentStep] = useState(1); // State to manage the current step
+    const [userInfo, setUserInfo] = useState({ name: '', email: '', city: '' });
 
     const handleIncrement = () => {
         setQuantity(quantity + 1);
@@ -22,57 +23,35 @@ const ProductDetails = ({ clickedProduct }) => {
     const handleAddToCart = () => {
         const updatedCartItems = [...cartItems, { product: clickedProduct, quantity }];
         setCartItems(updatedCartItems);
-        setShowCart(true);
+        setCurrentStep(2); // Move to the next step after adding to cart
     };
 
-    const handleClearCart = () => {
-        setCartItems([]);
-        setShowCart(false);
+    const handleOpenUserInformationPopup = () => {
+        setCurrentStep(3);
+    };
+
+    const handleCloseUserInformationPopup = () => {
+        setCurrentStep(2);
+    };
+
+    const handleUserInformationSubmit = () => {
+        setCurrentStep(1); // Move back to the first step
+        setUserInfo({ name: '', email: '', city: '' }); // Reset user information
+        setCartItems([]); // Clear cart items
     };
 
     return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, flexDirection: { xs: "column", sm: "row" } }}>
-            {showCart ? (
-                <Cart cartItems={cartItems} handleClearCart={handleClearCart} />
-            ) : (
-                <>
-                    <Box sx={{ display: "flex" }}>
-                        <img width={360} src={clickedProduct.attributes.productImg.data[selectedImg].attributes.url} alt="" />
-                    </Box>
-                    <Box sx={{ py: 2, textAlign: { xs: "center", sm: "left" } }}>
+            <Box sx={{ display: "flex" }}>
+                <img width={360} src={clickedProduct.attributes.productImg.data[selectedImg].attributes.url} alt="" />
+            </Box>
+            <Box sx={{ py: 2, textAlign: { xs: "center", sm: "left" } }}>
+                {currentStep === 1 && (
+                    <>
                         <Typography variant="h5">{clickedProduct.attributes.productTitle}</Typography>
                         <Typography my={0.4} fontSize={"22px"} color={"crimson"} variant="body1">{clickedProduct.attributes.productPrice}DT</Typography>
                         <Typography variant="body1">{clickedProduct.attributes.productDescription}</Typography>
-                        <Stack sx={{ justifyContent: { xs: "center", sm: "left" } }} direction={"row"} gap={1} my={2}>
-                            <ToggleButtonGroup
-                                value={selectedImg}
-                                exclusive
-                                sx={{
-                                    ".Mui-selected": {
-                                        border: "1px solid royalblue !important",
-                                        borderRadius: "5px !important",
-                                        opacity: "1",
-                                        backgroundColor: "initial",
-                                    },
-                                }}>
-                                {clickedProduct.attributes.productImg.data.map((item, index) => {
-                                    return (
-                                        <ToggleButton key={item.id} value={index} sx={{
-                                            width: "110px",
-                                            height: "110px",
-                                            mx: 1,
-                                            p: 0,
-                                            opacity: "0.5",
-                                        }}>
-                                            <img
-                                                onClick={() => setSelectedImg(index)}
-                                                style={{ borderRadius: 3 }} height={"100%"} width={"100%"} src={item.attributes.url} alt="" />
-                                        </ToggleButton>
-                                    );
-                                })}
-                            </ToggleButtonGroup>
-                        </Stack>
-
+                        {/* Add additional fields or prompts for product information */}
                         <Stack direction="row" alignItems="center" gap={1} my={2}>
                             <IconButton onClick={handleDecrement}>
                                 <Remove />
@@ -82,7 +61,6 @@ const ProductDetails = ({ clickedProduct }) => {
                                 <Add />
                             </IconButton>
                         </Stack>
-
                         <Button
                             sx={{ mb: { xs: 1, sm: 0 }, textTransform: "capitalize" }}
                             variant="contained"
@@ -90,9 +68,26 @@ const ProductDetails = ({ clickedProduct }) => {
                         >
                             <AddShoppingCartOutlined sx={{ mr: 1 }} fontSize='small' />add to cart
                         </Button>
-                    </Box>
-                </>
-            )}
+                    </>
+                )}
+                {currentStep === 2 && (
+                    <Dialog open={cartItems.length > 0} onClose={handleCloseProductModal}>
+                        <DialogTitle>Confirm Your Purchase</DialogTitle>
+                        <DialogContent>
+                            <Typography variant="body1">Product: {clickedProduct.attributes.productTitle}</Typography>
+                            <Typography variant="body1">Price per Item: {clickedProduct.attributes.productPrice} DT</Typography>
+                            <Typography variant="body1">Quantity: {quantity}</Typography>
+                            <Typography variant="body1">Total Price: {clickedProduct.attributes.productPrice * quantity} DT</Typography>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleOpenUserInformationPopup}>Proceed to Checkout</Button>
+                        </DialogActions>
+                    </Dialog>
+                )}
+                {currentStep === 3 && (
+                    <Cart cartItems={cartItems} />
+                )}
+            </Box>
         </Box>
     );
 };

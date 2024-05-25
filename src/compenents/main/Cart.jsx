@@ -23,7 +23,7 @@ const Cart = ({ cartItems, handleClearCart }) => {
     };
 
     return (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <ShoppingCartIcon sx={{ mr: 1 }} />
                 <Typography variant="h4">Shopping Cart</Typography>
@@ -38,7 +38,6 @@ const Cart = ({ cartItems, handleClearCart }) => {
             <TextField name="phoneNumber" label="Phone Number" variant="outlined" fullWidth onChange={handleChange} value={userInfo.phoneNumber} sx={{ mb: 1 }} />
             <TextField name="city" label="City" variant="outlined" fullWidth onChange={handleChange} value={userInfo.city} sx={{ mb: 2 }} />
             <Button onClick={handlePlaceOrder} variant="contained" sx={{ mr: 1 }}>Place Order</Button>
-            <Button onClick={handleClearCart} variant="outlined">Clear Cart</Button>
         </Box>
     );
 };
