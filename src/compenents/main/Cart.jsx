@@ -18,9 +18,7 @@ const Cart = ({ cartItems, handleClearCart }) => {
     };
 
     const handlePlaceOrder = () => {
-        // Here you can handle placing the order, you can send userInfo and cartItems to your backend or process the order here
         console.log("Placing order:", { userInfo, cartItems });
-        // After handling the order, you can clear the cart
         handleClearCart();
     };
 
