@@ -1,11 +1,12 @@
 import { ExpandMore, ShoppingCart, ShoppingCartOutlined } from "@mui/icons-material";
-import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider, Badge } from "@mui/material";
+import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider, Badge, Tooltip } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 const Search = styled('div')(({ theme }) => ({
     flexGrow: 0.4,
@@ -63,6 +64,22 @@ const Header2 = () => {
         if (storedOrderData) {
             setOrderData(JSON.parse(storedOrderData));
         }
+
+        // Fetch order data from server
+        const fetchOrderData = async () => {
+            try {
+                // Replace 'email' with the actual email address
+                const email = 'example@example.com'; // Replace with the actual email address
+                const response = await axios.get(`http://localhost:1337/orders?email=${email}`);
+                if (response.data && response.data.status !== undefined) {
+                    setOrderData(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching order data:', error);
+            }
+        };
+
+        fetchOrderData();
     }, []);
 
     const handlePopoverOpen = (event) => {
@@ -77,66 +94,70 @@ const Header2 = () => {
     const theme = useTheme();
     return (
         <Container sx={{ my: 3, display: "flex", justifyContent: "space-between" }}>
-            <Stack alignItems={"center"}>
-                <ShoppingCartOutlined />
-                <Typography variant="body2">Clean City</Typography>
-            </Stack>
+            <>
+                <Stack alignItems={"center"}>
+                    <ShoppingCartOutlined />
+                    <Typography variant="body2">Clean City</Typography>
+                </Stack>
 
-            <Stack direction={"row"} alignItems={"center"}>
-                <IconButton
-                    aria-label="cart"
+                <Stack direction={"row"} alignItems={"center"}>
+                    <Tooltip title="Order Information" arrow>
+                        <IconButton>
+                            <Person2OutlinedIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <IconButton
+                        aria-label="cart"
+                        onMouseEnter={handlePopoverOpen}
+                        onMouseLeave={handlePopoverClose}
+                    >
+                        <Badge badgeContent={orderData?.items?.length || 0} color="primary">
+                            <ShoppingCartIcon />
+                        </Badge>
+                    </IconButton>
+                </Stack>
+
+                <Popover
+                    sx={{ marginTop: 7 }}
+                    open={popoverOpen}
+                    anchorEl={anchorEl}
+                    onClose={handlePopoverClose}
+                    anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    disableRestoreFocus
                     onMouseEnter={handlePopoverOpen}
                     onMouseLeave={handlePopoverClose}
                 >
-                    <Badge badgeContent={orderData?.items?.length || 0} color="primary">
-                        <ShoppingCartIcon />
-                    </Badge>
-                </IconButton>
-                <IconButton>
-                    <Person2OutlinedIcon />
-                </IconButton>
-            </Stack>
-
-            <Popover
-                sx={{ marginTop: 7 }}
-                open={popoverOpen}
-                anchorEl={anchorEl}
-                onClose={handlePopoverClose}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                disableRestoreFocus
-                onMouseEnter={handlePopoverOpen}
-                onMouseLeave={handlePopoverClose}
-            >
-                <Box sx={{ p: 1, width: 300 }}>
-                    <Typography variant="h6">Order Summary</Typography>
-                    {orderData?.items ? (
-                        <>
-                            {orderData.items.map((item, index) => (
-                                <Box key={index} sx={{ mb: 2 }}>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product ID: {item.productId}</Typography>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography>Quantity: {item.quantity}</Typography>
-                                        <Typography>Total: {item.totalPrice} DT</Typography>
+                    <Box sx={{ p: 1, width: 300 }}>
+                        <Typography variant="h6">Order Summary</Typography>
+                        {orderData?.items ? (
+                            <>
+                                {orderData.items.map((item, index) => (
+                                    <Box key={index} sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product Name: {item.productId.attributes.productTitle}</Typography>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <Typography>Quantity: {item.quantity}</Typography>
+                                            <Typography>Total: {item.totalPrice} DT</Typography>
+                                        </Box>
+                                        <Divider sx={{ my: 1 }} />
                                     </Box>
-                                    <Divider sx={{ my: 1 }} />
-                                </Box>
-                            ))}
-                            <Typography variant="body2">Email: {orderData.user.email}</Typography>
-                            <Typography variant="body2">Phone: {orderData.user.phoneNumber}</Typography>
-                            <Typography variant="body2">City: {orderData.user.city}</Typography>
-                        </>
-                    ) : (
-                        <Typography variant="body2">No orders found.</Typography>
-                    )}
-                </Box>
-            </Popover>
+                                ))}
+                                <Typography variant="body2">Email: {orderData.user.email}</Typography>
+                                <Typography variant="body2">Phone: {orderData.user.phoneNumber}</Typography>
+                                <Typography variant="body2">City: {orderData.user.city}</Typography>
+                            </>
+                        ) : (
+                            <Typography variant="body2">No orders found.</Typography>
+                        )}
+                    </Box>
+                </Popover>
+            </>
         </Container>
     );
 };

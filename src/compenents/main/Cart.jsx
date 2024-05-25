@@ -68,7 +68,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
             orderData = {
                 user: userInfo,
                 items: cartItems.map(item => ({
-                    productId: item.product.id,
+                    productId: item.product,
                     quantity: item.quantity,
                     totalPrice: (item.product.attributes.productPrice * item.quantity).toFixed(2)
                 }))
