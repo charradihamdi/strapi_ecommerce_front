@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, TextField } from '@mui/material';
+import { Box, Typography, Button, TextField, Divider } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const Cart = ({ cartItems, handleClearCart }) => {
@@ -29,11 +29,18 @@ const Cart = ({ cartItems, handleClearCart }) => {
                 <Typography variant="h4">Shopping Cart</Typography>
             </Box>
             {cartItems.map((item, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>{item.product.attributes.productTitle}</Typography>
-                    <Typography>{item.quantity}</Typography>
+                <Box key={index} sx={{ mb: 2 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>{item.product.attributes.productTitle}</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography>{item.quantity}</Typography>
+                        <Typography>{item.product.attributes.productPrice * item.quantity} DT</Typography>
+                    </Box>
+                    <Divider sx={{ my: 1 }} />
                 </Box>
             ))}
+            <Typography variant="h5">Locate yourself to receive the product</Typography>
+
+            <Divider sx={{ my: 2 }} />
             <TextField name="email" label="Email" variant="outlined" fullWidth onChange={handleChange} value={userInfo.email} sx={{ mb: 1 }} />
             <TextField name="phoneNumber" label="Phone Number" variant="outlined" fullWidth onChange={handleChange} value={userInfo.phoneNumber} sx={{ mb: 1 }} />
             <TextField name="city" label="City" variant="outlined" fullWidth onChange={handleChange} value={userInfo.city} sx={{ mb: 2 }} />
