@@ -140,7 +140,7 @@ const Header2 = () => {
                             <>
                                 {orderData.items.map((item, index) => (
                                     <Box key={index} sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product Name: {item.productId.attributes.productTitle}</Typography>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product Name: {item?.productId?.attributes?.productTitle}</Typography>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <Typography>Quantity: {item.quantity}</Typography>
                                             <Typography>Total: {item.totalPrice} DT</Typography>
