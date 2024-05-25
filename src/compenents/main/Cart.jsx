@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, TextField, Divider } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import axios from 'axios';
 
 const Cart = ({ cartItems, handleClearCart }) => {
     const [userInfo, setUserInfo] = useState({
@@ -18,8 +19,24 @@ const Cart = ({ cartItems, handleClearCart }) => {
     };
 
     const handlePlaceOrder = () => {
-        console.log("Placing order:", { userInfo, cartItems });
-        handleClearCart();
+        // Prepare order data
+        const orderData = {
+            userInfo: userInfo,
+            cartItems: cartItems.map(item => ({
+                productId: item.product.id,
+                quantity: item.quantity
+            }))
+        };
+        localStorage.setItem('orderData', JSON.stringify(orderData));
+        // Make POST request to create order
+        axios.post('your_api_endpoint_here', orderData)
+            .then(response => {
+                console.log('Order placed successfully:', response.data);
+                handleClearCart();
+            })
+            .catch(error => {
+                console.error('Error placing order:', error);
+            });
     };
 
     return (
