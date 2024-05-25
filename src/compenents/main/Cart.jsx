@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, TextField, Divider, Alert } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import axios from 'axios';
@@ -10,6 +10,15 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
         city: ''
     });
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        // Retrieve existing user information from local storage
+        const storedOrderData = localStorage.getItem('orderData');
+        if (storedOrderData) {
+            const parsedOrderData = JSON.parse(storedOrderData);
+            setUserInfo(parsedOrderData.user);
+        }
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -27,14 +36,44 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
 
         setError(''); // Clear any previous errors
 
-        const orderData = {
-            user: userInfo,
-            items: cartItems.map(item => ({
+        // Retrieve existing order data from local storage if it exists
+        let existingOrderData = localStorage.getItem('orderData');
+        let orderData;
+
+        if (existingOrderData) {
+            existingOrderData = JSON.parse(existingOrderData);
+            // Merge existing items with new items
+            const existingItems = existingOrderData.items;
+            const newItems = cartItems.map(item => ({
                 productId: item.product.id,
                 quantity: item.quantity,
                 totalPrice: (item.product.attributes.productPrice * item.quantity).toFixed(2)
-            }))
-        };
+            }));
+
+            newItems.forEach(newItem => {
+                const existingItem = existingItems.find(item => item.productId === newItem.productId);
+                if (existingItem) {
+                    existingItem.quantity += newItem.quantity;
+                    existingItem.totalPrice = (parseFloat(existingItem.totalPrice) + parseFloat(newItem.totalPrice)).toFixed(2);
+                } else {
+                    existingItems.push(newItem);
+                }
+            });
+
+            orderData = {
+                user: userInfo,
+                items: existingItems
+            };
+        } else {
+            orderData = {
+                user: userInfo,
+                items: cartItems.map(item => ({
+                    productId: item.product.id,
+                    quantity: item.quantity,
+                    totalPrice: (item.product.attributes.productPrice * item.quantity).toFixed(2)
+                }))
+            };
+        }
 
         localStorage.setItem('orderData', JSON.stringify(orderData));
         window.location.reload();
@@ -43,7 +82,6 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
             if (response.status === 201) {
                 console.log('Order placed successfully:', response.data);
                 handleUserInformationSubmit();
-
             } else {
                 console.error('Failed to place order:', response.statusText);
             }
