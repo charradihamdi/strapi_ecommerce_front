@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Stack, ToggleButton, ToggleButtonGroup, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
-import { AddShoppingCartOutlined, Add, Remove, Close } from '@mui/icons-material';
+import { Box, Typography, Button, Stack, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { AddShoppingCartOutlined, Add, Remove } from '@mui/icons-material';
 import Cart from './Cart'; // Import the Cart component
 
 const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishShopping }) => {
@@ -35,9 +35,18 @@ const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishS
     };
 
     const handleUserInformationSubmit = () => {
+        const totalPrice = calculateTotalPrice();
+        const orderData = { userInfo, cartItems, totalPrice };
+        localStorage.setItem('orderData', JSON.stringify(orderData));
         setCurrentStep(1); // Move back to the first step
         setUserInfo({ name: '', email: '', city: '' }); // Reset user information
         setCartItems([]); // Clear cart items
+    };
+
+    const calculateTotalPrice = () => {
+        return cartItems.reduce((total, item) => {
+            return total + item.product.attributes.productPrice * item.quantity;
+        }, 0).toFixed(2);
     };
 
     return (
@@ -77,7 +86,7 @@ const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishS
                             <Typography variant="body1">Product: {clickedProduct.attributes.productTitle}</Typography>
                             <Typography variant="body1">Price per Item: {clickedProduct.attributes.productPrice} DT</Typography>
                             <Typography variant="body1">Quantity: {quantity}</Typography>
-                            <Typography variant="body1">Total Price: {clickedProduct.attributes.productPrice * quantity} DT</Typography>
+                            <Typography variant="body1">Total Price: {(clickedProduct.attributes.productPrice * quantity).toFixed(2)} DT</Typography>
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleOpenUserInformationPopup}>Proceed to Checkout</Button>
@@ -85,7 +94,7 @@ const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishS
                     </Dialog>
                 )}
                 {currentStep === 3 && (
-                    <Cart cartItems={cartItems} />
+                    <Cart cartItems={cartItems} handleUserInformationSubmit={handleUserInformationSubmit} />
                 )}
             </Box>
         </Box>

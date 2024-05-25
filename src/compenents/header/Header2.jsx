@@ -1,16 +1,11 @@
 import { ExpandMore, ShoppingCart, ShoppingCartOutlined } from "@mui/icons-material";
-import { Badge, Container, IconButton, List, ListItem, ListItemButton, ListItemText, Menu, MenuItem, Stack, Typography, useTheme } from "@mui/material";
+import { Badge, Container, IconButton, List, ListItem, ListItemText, Menu, MenuItem, Stack, Typography, useTheme, Popover, Box, Divider } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-
-import React, { useState } from "react";
-
-
-
-
+import React, { useState, useEffect } from "react";
 
 const Search = styled('div')(({ theme }) => ({
     flexGrow: 0.4,
@@ -66,108 +61,92 @@ const options = ["All categories", "Women", "Man", "Baby", "House"];
 
 const Header2 = () => {
     const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const open = Boolean(anchorEl);
-    const handleClickListItem = (event) => {
+    const [popoverOpen, setPopoverOpen] = useState(false);
+    const [orderData, setOrderData] = useState(null);
+
+    useEffect(() => {
+        // Retrieve order data from local storage when component mounts
+        const storedOrderData = localStorage.getItem('orderData');
+        if (storedOrderData) {
+            setOrderData(JSON.parse(storedOrderData));
+        }
+    }, []);
+
+    const handlePopoverOpen = (event) => {
         setAnchorEl(event.currentTarget);
+        setPopoverOpen(true);
     };
 
-    const handleMenuItemClick = (
-        event, index) => {
-        setSelectedIndex(index);
-        setAnchorEl(null);
+    const handlePopoverClose = () => {
+        setPopoverOpen(false);
     };
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-
-    const theme = useTheme()
+    const theme = useTheme();
     return (
-        
-        
-            <Container sx={{ my: 3, display: "flex", justifyContent: "space-between" }}>
-                <Stack
+        <Container sx={{ my: 3, display: "flex", justifyContent: "space-between" }}>
+            <Stack alignItems={"center"}>
+                <ShoppingCartOutlined />
+                <Typography variant="body2">Clean City</Typography>
+            </Stack>
 
-                    alignItems={"center"}>
-                    <ShoppingCartOutlined />
-                    <Typography variant="body2">Clean City</Typography>
-                </Stack>
-                <Search
-                    sx={{ borderRadius: "22px", display: "flex", justifyContent: "space-between" }} >
-                    <SearchIconWrapper>
-                        <SearchIcon />
-                    </SearchIconWrapper>
-                    <StyledInputBase
-                        placeholder="Search…"
-                        inputProps={{ 'aria-label': 'search' }}
-                    />
+            <Stack direction={"row"} alignItems={"center"}>
+                <IconButton
+                    aria-label="cart"
+                    onMouseEnter={handlePopoverOpen}
+                    onMouseLeave={handlePopoverClose}
+                >
+                    <StyledBadge badgeContent={orderData?.cartItems?.length} color="primary">
+                        <ShoppingCartIcon />
+                    </StyledBadge>
+                </IconButton>
+                <IconButton>
+                    <Person2OutlinedIcon />
+                </IconButton>
+            </Stack>
 
+            <Popover
+                sx={{ marginTop: 7 }}
+                open={popoverOpen}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                disableRestoreFocus
+                onMouseEnter={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+            >
 
-                    <div>
-                        <List
-                            component="nav"
-                            aria-label="Device settings"
-                            // @ts-ignore
-                            sx={{ bgcolor: theme.palette.myColor.main, borderBottomRightRadius: 22, borderTopRightRadius: 22, p: "0" }}
-                        >
-                            <ListItem
-                                id="lock-button"
-                                aria-haspopup="listbox"
-                                aria-controls="lock-menu"
-                                aria-label="when device is locked"
-                                aria-expanded={open ? 'true' : undefined}
-                                onClick={handleClickListItem}
-                            >
-                                <ListItemText
-                                    // className="border"
-                                    sx={{ width: 93, textAlign: "center", "&:hover": { cursor: "pointer" } }}
-                                    secondary={options[selectedIndex]}
-                                />
-                                <ExpandMore sx={{ fontSize: "16px" }} />
-                            </ListItem>
-                        </List>
-                        <Menu
-                            id="lock-menu"
-                            anchorEl={anchorEl}
-                            open={open}
-                            onClose={handleClose}
-                            MenuListProps={{
-                                'aria-labelledby': 'lock-button',
-                                role: 'listbox',
-                            }}
-                        >
-                            {options.map((option, index) => (
-                                <MenuItem
-                                    sx={{ fontSize: "13px" }}
-                                    key={option}
-                                    selected={index === selectedIndex}
-                                    onClick={(event) => handleMenuItemClick(event, index)}
-                                >
-                                    {option}
-                                </MenuItem>
+                <Box sx={{ p: 1, width: 300 }}>
+                    <Typography variant="h6">Order Summary</Typography>
+                    {orderData ? (
+                        <>
+                            {orderData.cartItems.map((item, index) => (
+                                <Box key={index} sx={{ mb: 2 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>{item.product?.attributes?.productTitle}</Typography>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Typography>Quantity: {item?.quantity}</Typography>
+                                        <Typography>Total: {(item.product?.attributes?.productPrice * item?.quantity).toFixed(2)} DT</Typography>
+                                    </Box>
+                                    <Divider sx={{ my: 1 }} />
+                                </Box>
                             ))}
-                        </Menu>
-                    </div>
-                </Search>
-                <Stack direction={"row"} alignItems={"center"}>
-
-
-                    <IconButton aria-label="cart">
-                        <StyledBadge badgeContent={4} color="primary" >
-                            <ShoppingCartIcon  />
-                        </StyledBadge>
-                    </IconButton>
-                    <IconButton>
-                        <Person2OutlinedIcon />
-                    </IconButton>
-                </Stack>
-
-            </Container>
-           
-            
+                            <Typography variant="body2">Email: {orderData.userInfo.email}</Typography>
+                            <Typography variant="body2">Phone: {orderData.userInfo.phoneNumber}</Typography>
+                            <Typography variant="body2">City: {orderData.userInfo.city}</Typography>
+                        </>
+                    ) : (
+                        <Typography variant="body2">No orders found.</Typography>
+                    )}
+                </Box>
+            </Popover>
+        </Container>
     );
 };
-export default Header2 
 
+export default Header2;
