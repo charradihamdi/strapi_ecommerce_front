@@ -37,17 +37,19 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
         };
 
         localStorage.setItem('orderData', JSON.stringify(orderData));
+        window.location.reload();
         try {
             const response = await axios.post('http://localhost:1337/orders', orderData);
-
             if (response.status === 201) {
                 console.log('Order placed successfully:', response.data);
                 handleUserInformationSubmit();
+
             } else {
                 console.error('Failed to place order:', response.statusText);
             }
         } catch (error) {
             console.error('Error placing order:', error);
+            window.location.reload();
         }
     };
 
