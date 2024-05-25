@@ -1,5 +1,5 @@
 import { ExpandMore, ShoppingCart, ShoppingCartOutlined } from "@mui/icons-material";
-import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider } from "@mui/material";
+import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider, Badge } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
@@ -88,7 +88,9 @@ const Header2 = () => {
                     onMouseEnter={handlePopoverOpen}
                     onMouseLeave={handlePopoverClose}
                 >
-                    <ShoppingCartIcon />
+                    <Badge badgeContent={orderData?.items?.length || 0} color="primary">
+                        <ShoppingCartIcon />
+                    </Badge>
                 </IconButton>
                 <IconButton>
                     <Person2OutlinedIcon />
@@ -112,7 +114,6 @@ const Header2 = () => {
                 onMouseEnter={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
             >
-
                 <Box sx={{ p: 1, width: 300 }}>
                     <Typography variant="h6">Order Summary</Typography>
                     {orderData?.items ? (
