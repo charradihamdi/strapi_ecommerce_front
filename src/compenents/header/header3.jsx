@@ -42,77 +42,10 @@ const Header3 = () => {
             };
     return (
         <Container sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 5, }}>
-            <Box>
-                <Button
-                    id="basic-button"
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
 
-                    // @ts-ignore
-                    sx={{
-                        // @ts-ignore
-                        width: 222, bgcolor: theme.palette.myColor.main,
-
-                        // @ts-ignore
-                        color: theme.palette.text.secondary
-                    }}
-                >
-                    <Window />
-                    <Typography sx={{
-                        padding: "0",
-                        textTransform: "capitalize",
-                        mx: 1,
-                    }}>
-                        Categories
-                    </Typography>
-                    <Box flexGrow={1} />
-
-                    <KeyboardArrowRightOutlined />
-                </Button>
-                <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                        'aria-labelledby': 'basic-button',
-                    }}
-                    // @ts-ignore
-                    sx={{ ".MuiPaper-root": { width: 222, bgcolor: theme.palette.myColor.main, } }}
-                >
-                    <MenuItem onClick={handleClose}>
-                        <ListItemIcon>
-                            < WomanOutlined fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText>Women</ListItemText>
-                    </MenuItem>
-                    <MenuItem onClick={handleClose}>
-                        <ListItemIcon>
-                            < ManOutlined fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText>Man</ListItemText>
-                    </MenuItem>
-                    <MenuItem onClick={handleClose}>
-                        <ListItemIcon>
-                            < ChildCareOutlined fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText>Baby</ListItemText>
-                    </MenuItem>
-                    <MenuItem onClick={handleClose}>
-                        <ListItemIcon>
-                            < HouseOutlined fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText>House</ListItemText>
-                    </MenuItem>
-                </Menu>
-            </Box>
             {useMediaQuery('(min-width:1200px)') && (<Stack gap={4} direction="row" alignItems={"center"}>
                 <Links title={"Home"} />
-                <Links title={"Mega Menu"} />
-                <Links title={"Full Screen Menu"} />
-                <Links title={"Pages"} />
+
                 <Links title={"User Account"} />
                 <Links title={"Vendor Account"} /></Stack>)}
 
@@ -130,10 +63,12 @@ const Header3 = () => {
             >
                 aaaaaaaaaaa
                 <Box sx={{ Width: 444, mx: "auto", mt: 6, position: "relative", pt: 10 }}>
-                    <IconButton sx={{ ":hover": { color: "red", rotate: "180deg", transition: "0.3s" },
-                     position: "absolute",
-                      top: 0, right: 10 }}
-                       onClick={toggleDrawer("top", false)}>
+                    <IconButton sx={{
+                        ":hover": { color: "red", rotate: "180deg", transition: "0.3s" },
+                        position: "absolute",
+                        top: 0, right: 10
+                    }}
+                        onClick={toggleDrawer("top", false)}>
                         <CloseIcon />
                     </IconButton>
                     {[{ mainLink: "Home", subLink: ["Link1", "Link2", "Link3"] },

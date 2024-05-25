@@ -23,20 +23,19 @@ function App() {
 
         <Header1 />
         <Header2 />
-        <Header3 />
         <Box
           bgcolor={theme.
             // @ts-ignore
             palette.bg.main}>
           <Hero />
           <Main />
-       
+
         </Box>
-       
+
         <Footer />
 
         <ScrollToTop />
-        
+
 
       </ThemeProvider>
     </ColorModeContext.Provider>

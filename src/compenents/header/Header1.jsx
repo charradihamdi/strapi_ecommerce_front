@@ -45,15 +45,15 @@ const Header1 = () => {
       <Container>
         <Stack direction={"row"} alignItems={"center"}>
 
-        <Typography
-          sx={{
-            fontSize: "12px",
-            fontWeight: 300,
-            color: "fff",
-          }}
-        > 
-        Express Shipping
-        </Typography>
+          <Typography
+            sx={{
+              fontSize: "12px",
+              fontWeight: 300,
+              color: "fff",
+            }}
+          >
+            Express Shipping
+          </Typography>
 
           <Box flexGrow={1} />
           <div>
