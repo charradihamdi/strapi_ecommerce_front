@@ -34,14 +34,7 @@ const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishS
         setCurrentStep(2);
     };
 
-    const handleUserInformationSubmit = () => {
-        const totalPrice = calculateTotalPrice();
-        const orderData = { userInfo, cartItems, totalPrice };
-        localStorage.setItem('orderData', JSON.stringify(orderData));
-        setCurrentStep(1); // Move back to the first step
-        setUserInfo({ name: '', email: '', city: '' }); // Reset user information
-        setCartItems([]); // Clear cart items
-    };
+
 
     const calculateTotalPrice = () => {
         return cartItems.reduce((total, item) => {
@@ -94,7 +87,7 @@ const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishS
                     </Dialog>
                 )}
                 {currentStep === 3 && (
-                    <Cart cartItems={cartItems} handleUserInformationSubmit={handleUserInformationSubmit} />
+                    <Cart cartItems={cartItems} />
                 )}
             </Box>
         </Box>

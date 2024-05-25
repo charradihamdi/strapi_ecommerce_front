@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, TextField, Divider } from '@mui/material';
+import { Box, Typography, Button, TextField, Divider, Alert } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import axios from 'axios';
 
 const Cart = ({ cartItems, handleUserInformationSubmit }) => {
     const [userInfo, setUserInfo] = useState({
@@ -8,6 +9,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
         phoneNumber: '',
         city: ''
     });
+    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -18,6 +20,13 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
     };
 
     const handlePlaceOrder = async () => {
+        if (!userInfo.email || !userInfo.phoneNumber || !userInfo.city) {
+            setError('All fields are required.');
+            return;
+        }
+
+        setError(''); // Clear any previous errors
+
         const orderData = {
             user: userInfo,
             items: cartItems.map(item => ({
@@ -27,19 +36,12 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
             }))
         };
 
+        localStorage.setItem('orderData', JSON.stringify(orderData));
         try {
-            const response = await fetch('http://localhost:1337/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(orderData)
-            });
+            const response = await axios.post('http://localhost:1337/orders', orderData);
 
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Order placed successfully:', result);
-                localStorage.setItem('orderData', JSON.stringify(orderData));
+            if (response.status === 201) {
+                console.log('Order placed successfully:', response.data);
                 handleUserInformationSubmit();
             } else {
                 console.error('Failed to place order:', response.statusText);
@@ -77,6 +79,11 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
             <TextField name="email" label="Email" variant="outlined" fullWidth onChange={handleChange} value={userInfo.email} sx={{ mb: 1 }} />
             <TextField name="phoneNumber" label="Phone Number" variant="outlined" fullWidth onChange={handleChange} value={userInfo.phoneNumber} sx={{ mb: 1 }} />
             <TextField name="city" label="City" variant="outlined" fullWidth onChange={handleChange} value={userInfo.city} sx={{ mb: 2 }} />
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
             <Button onClick={handlePlaceOrder} variant="contained" sx={{ mr: 1 }}>Place Order</Button>
         </Box>
     );

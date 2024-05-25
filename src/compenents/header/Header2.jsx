@@ -1,5 +1,5 @@
 import { ExpandMore, ShoppingCart, ShoppingCartOutlined } from "@mui/icons-material";
-import { Badge, Container, IconButton, List, ListItem, ListItemText, Menu, MenuItem, Stack, Typography, useTheme, Popover, Box, Divider } from "@mui/material";
+import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
@@ -48,14 +48,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         },
     },
 }));
-const StyledBadge = styled(Badge)(({ theme }) => ({
-    '& .MuiBadge-badge': {
-        right: -3,
-        top: 13,
-        border: `2px solid ${theme.palette.background.paper}`,
-        padding: '0 4px',
-    },
-}));
 
 const options = ["All categories", "Women", "Man", "Baby", "House"];
 
@@ -63,6 +55,7 @@ const Header2 = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [orderData, setOrderData] = useState(null);
+    console.log({ orderData });
 
     useEffect(() => {
         // Retrieve order data from local storage when component mounts
@@ -95,9 +88,7 @@ const Header2 = () => {
                     onMouseEnter={handlePopoverOpen}
                     onMouseLeave={handlePopoverClose}
                 >
-                    <StyledBadge badgeContent={orderData?.cartItems?.length} color="primary">
-                        <ShoppingCartIcon />
-                    </StyledBadge>
+                    <ShoppingCartIcon />
                 </IconButton>
                 <IconButton>
                     <Person2OutlinedIcon />
@@ -124,21 +115,21 @@ const Header2 = () => {
 
                 <Box sx={{ p: 1, width: 300 }}>
                     <Typography variant="h6">Order Summary</Typography>
-                    {orderData ? (
+                    {orderData?.items ? (
                         <>
-                            {orderData.cartItems.map((item, index) => (
+                            {orderData.items.map((item, index) => (
                                 <Box key={index} sx={{ mb: 2 }}>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>{item.product?.attributes?.productTitle}</Typography>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product ID: {item.productId}</Typography>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography>Quantity: {item?.quantity}</Typography>
-                                        <Typography>Total: {(item.product?.attributes?.productPrice * item?.quantity).toFixed(2)} DT</Typography>
+                                        <Typography>Quantity: {item.quantity}</Typography>
+                                        <Typography>Total: {item.totalPrice} DT</Typography>
                                     </Box>
                                     <Divider sx={{ my: 1 }} />
                                 </Box>
                             ))}
-                            <Typography variant="body2">Email: {orderData.userInfo.email}</Typography>
-                            <Typography variant="body2">Phone: {orderData.userInfo.phoneNumber}</Typography>
-                            <Typography variant="body2">City: {orderData.userInfo.city}</Typography>
+                            <Typography variant="body2">Email: {orderData.user.email}</Typography>
+                            <Typography variant="body2">Phone: {orderData.user.phoneNumber}</Typography>
+                            <Typography variant="body2">City: {orderData.user.city}</Typography>
                         </>
                     ) : (
                         <Typography variant="body2">No orders found.</Typography>
