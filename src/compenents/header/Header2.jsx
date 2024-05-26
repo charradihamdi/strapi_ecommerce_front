@@ -225,7 +225,7 @@ const Header2 = () => {
                     )}
                 </Box>
                 <Box sx={{ p: 1 }}>
-                    <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>
+                    {localOrderData?.items && <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>}
                 </Box>
             </Popover>
         </Container>
