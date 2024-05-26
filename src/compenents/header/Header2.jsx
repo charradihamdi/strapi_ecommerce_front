@@ -1,5 +1,5 @@
 import { ExpandMore, ShoppingCart, ShoppingCartOutlined } from "@mui/icons-material";
-import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider, Badge, Tooltip } from "@mui/material";
+import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider, Badge, Tooltip, Button } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
@@ -56,21 +56,21 @@ const Header2 = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [orderData, setOrderData] = useState(null);
-    console.log({ orderData });
+    const [localOrderData, setLocalOrderData] = useState(null);
 
     useEffect(() => {
-        // Retrieve order data from local storage when component mounts
-        const storedOrderData = localStorage.getItem('orderData');
-        if (storedOrderData) {
-            setOrderData(JSON.parse(storedOrderData));
+        // Retrieve local order data from local storage when component mounts
+        const storedLocalOrderData = localStorage.getItem('orderData');
+        if (storedLocalOrderData) {
+            setLocalOrderData(JSON.parse(storedLocalOrderData));
         }
 
         // Fetch order data from server
         const fetchOrderData = async () => {
             try {
                 // Replace 'email' with the actual email address
-                const email = 'example@example.com'; // Replace with the actual email address
-                const response = await axios.get(`http://localhost:1337/orders?email=${email}`);
+                const email = 'charradihamdi1@gmail.com'; // Replace with the actual email address
+                const response = await axios.get(`http://localhost:5555/api/baskets/email/${email}`);
                 if (response.data && response.data.status !== undefined) {
                     setOrderData(response.data);
                 }
@@ -89,6 +89,38 @@ const Header2 = () => {
 
     const handlePopoverClose = () => {
         setPopoverOpen(false);
+    };
+
+    const handleOrderSubmit = async () => {
+        if (!localOrderData || !localOrderData.items || localOrderData.items.length === 0) {
+            console.error('No local orders to submit');
+            return;
+        }
+
+        const data = {
+            username: 'zear', // Replace with actual username
+            email: 'admsssin@admin.com', // Replace with actual email
+            phone: 456565, // Replace with actual phone number
+            products: localOrderData.items.map(item => ({
+                product: item.productId?.attributes?.productTitle || "prod",
+                quantity: item.quantity,
+            })),
+            totalPrice: 13
+        };
+
+        console.log('Submitting order data:', { data });
+
+        try {
+            const response = await axios.post('http://localhost:5555/api/baskets', { data: { data: data } });
+
+            if (response.status === 201) {
+                console.log('Order placed successfully:', response.data);
+            } else {
+                console.error('Failed to place order:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error submitting order:', error);
+        }
     };
 
     const theme = useTheme();
@@ -111,7 +143,7 @@ const Header2 = () => {
                         onMouseEnter={handlePopoverOpen}
                         onMouseLeave={handlePopoverClose}
                     >
-                        <Badge badgeContent={orderData?.items?.length || 0} color="primary">
+                        <Badge badgeContent={(orderData?.items?.length || 0) + (localOrderData?.items?.length || 0)} color="primary">
                             <ShoppingCartIcon />
                         </Badge>
                     </IconButton>
@@ -136,6 +168,7 @@ const Header2 = () => {
                 >
                     <Box sx={{ p: 1, width: 300 }}>
                         <Typography variant="h6">Order Summary</Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Existing Orders</Typography>
                         {orderData?.items ? (
                             <>
                                 {orderData.items.map((item, index) => (
@@ -153,8 +186,29 @@ const Header2 = () => {
                                 <Typography variant="body2">City: {orderData.user.city}</Typography>
                             </>
                         ) : (
-                            <Typography variant="body2">No orders found.</Typography>
+                            <Typography variant="body2">No existing orders found.</Typography>
                         )}
+
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>New Orders</Typography>
+                        {localOrderData?.items ? (
+                            <>
+                                {localOrderData.items.map((item, index) => (
+                                    <Box key={index} sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product Name: {item?.productId?.attributes?.productTitle}</Typography>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <Typography>Quantity: {item.quantity}</Typography>
+                                            <Typography>Total: {item.totalPrice} DT</Typography>
+                                        </Box>
+                                        <Divider sx={{ my: 1 }} />
+                                    </Box>
+                                ))}
+                            </>
+                        ) : (
+                            <Typography variant="body2">No local orders found.</Typography>
+                        )}
+                    </Box>
+                    <Box sx={{ p: 1 }}>
+                        <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>
                     </Box>
                 </Popover>
             </>
