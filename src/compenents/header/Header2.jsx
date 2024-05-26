@@ -68,7 +68,6 @@ const Header2 = () => {
         // Fetch order data from server
         const fetchOrderData = async () => {
             try {
-                // Replace 'email' with the actual email address
                 const email = 'charradihamdi1@gmail.com'; // Replace with the actual email address
                 const response = await axios.get(`http://localhost:5555/api/baskets/email/${email}`);
                 if (response.data && response.data.status !== undefined) {
@@ -97,21 +96,23 @@ const Header2 = () => {
             return;
         }
 
+        const totalPrice = localOrderData.items.reduce((sum, item) => sum + item.totalPrice, 0);
+
         const data = {
             username: 'zear', // Replace with actual username
             email: 'admsssin@admin.com', // Replace with actual email
             phone: 456565, // Replace with actual phone number
             products: localOrderData.items.map(item => ({
-                product: item.productId?.attributes?.productTitle || "prod",
+                product: item.productId?.attributes?.productTitle,
                 quantity: item.quantity,
             })),
-            totalPrice: 13
+            totalprice: totalPrice
         };
 
         console.log('Submitting order data:', { data });
 
         try {
-            const response = await axios.post('http://localhost:5555/api/baskets', { data: { data: data } });
+            const response = await axios.post('http://localhost:5555/api/baskets', { data });
 
             if (response.status === 201) {
                 console.log('Order placed successfully:', response.data);
