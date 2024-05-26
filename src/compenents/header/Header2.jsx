@@ -117,7 +117,7 @@ const Header2 = () => {
             </Stack>
 
             <Popover
-                sx={{ marginTop: 7 }}
+                sx={{ marginTop: 8 }}
                 open={popoverOpen}
                 anchorEl={anchorEl}
                 onClose={handlePopoverClose}
