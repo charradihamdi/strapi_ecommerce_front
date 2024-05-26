@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, TextField, Divider, Alert } from '@mui/material';
+import { Box, Typography, Button, Divider, TextField, Alert } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import axios from 'axios';
 
@@ -10,6 +10,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
         city: ''
     });
     const [error, setError] = useState('');
+    const [isUserInfoPresent, setIsUserInfoPresent] = useState(false);
 
     useEffect(() => {
         // Retrieve existing user information from local storage
@@ -17,6 +18,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
         if (storedOrderData) {
             const parsedOrderData = JSON.parse(storedOrderData);
             setUserInfo(parsedOrderData.user);
+            setIsUserInfoPresent(true);
         }
     }, []);
 
@@ -68,7 +70,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
             orderData = {
                 user: userInfo,
                 items: cartItems.map(item => ({
-                    productId: item.product,
+                    productId: item.product.id,
                     quantity: item.quantity,
                     totalPrice: (item.product.attributes.productPrice * item.quantity).toFixed(2)
                 }))
@@ -77,7 +79,6 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
 
         localStorage.setItem('orderData', JSON.stringify(orderData));
         window.location.reload();
-
     };
 
     const calculateTotalPrice = () => {
@@ -102,12 +103,17 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
                     <Divider sx={{ my: 1 }} />
                 </Box>
             ))}
-            <Typography variant="h5">Localize yourself to obtain the product</Typography>
+            {!isUserInfoPresent && (
+                <>
+                    <Typography variant="h5">Localize yourself to obtain the product</Typography>
 
-            <Divider sx={{ my: 2 }} />
-            <TextField name="email" label="Email" variant="outlined" fullWidth onChange={handleChange} value={userInfo.email} sx={{ mb: 1 }} />
-            <TextField name="phoneNumber" label="Phone Number" variant="outlined" fullWidth onChange={handleChange} value={userInfo.phoneNumber} sx={{ mb: 1 }} />
-            <TextField name="city" label="City" variant="outlined" fullWidth onChange={handleChange} value={userInfo.city} sx={{ mb: 2 }} />
+                    <Divider sx={{ my: 2 }} />
+
+                    <TextField name="email" label="Email" variant="outlined" fullWidth onChange={handleChange} value={userInfo.email} sx={{ mb: 1 }} />
+                    <TextField name="phoneNumber" label="Phone Number" variant="outlined" fullWidth onChange={handleChange} value={userInfo.phoneNumber} sx={{ mb: 1 }} />
+                    <TextField name="city" label="City" variant="outlined" fullWidth onChange={handleChange} value={userInfo.city} sx={{ mb: 2 }} />
+                </>
+            )}
             {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
                     {error}
