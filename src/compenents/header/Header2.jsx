@@ -147,10 +147,11 @@ const Header2 = () => {
                         {existingOrder.map(order => (
                             <Paper key={order.id} elevation={2} sx={{ p: 2, mt: 1 }}>
                                 <Typography variant="body2">Order ID: {order.id}</Typography>
-                                <Typography variant="body2">Status: {order.submitted ? "Packed" : "Unpacked"}</Typography>
+                                <Typography variant="body2" sx={{ color: order.submitted ? 'green' : 'inherit' }}>Status: {order.submitted ? "Packed" : "Unpacked"}</Typography>
                                 <Typography variant="body2">Total: {order.totalprice} DT</Typography>
                             </Paper>
                         ))}
+
                     </Box>
 
                     {/* New Orders */}
