@@ -59,7 +59,7 @@ const Header2 = () => {
         const totalPrice = localOrderData.items.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
 
         const data = {
-            username: 'zear', // Replace with actual username
+            username: 'zear',
             email: localOrderData.user.email, // Use actual email from localOrderData
             phone: localOrderData.user.phoneNumber, // Use actual phone number from localOrderData
             products: localOrderData.items.map(item => ({
@@ -77,8 +77,13 @@ const Header2 = () => {
             if (response.status === 200) {
                 console.log('Order placed successfully:', response.data);
 
-                // Clear local order data from local storage
-                localStorage.removeItem('orderData');
+                // Remove products list from local storage
+                const storedLocalOrderData = localStorage.getItem('orderData');
+                if (storedLocalOrderData) {
+                    const parsedData = JSON.parse(storedLocalOrderData);
+                    parsedData.items = []; // Remove products list
+                    localStorage.setItem('orderData', JSON.stringify(parsedData));
+                }
 
                 // Refresh the page
                 window.location.reload();
@@ -89,6 +94,7 @@ const Header2 = () => {
             console.error('Error submitting order:', error);
         }
     };
+
 
 
     return (
