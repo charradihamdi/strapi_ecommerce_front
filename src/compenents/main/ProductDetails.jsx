@@ -41,7 +41,7 @@ const ProductDetails = ({ clickedProduct, handleCloseProductModal, handleFinishS
             return total + item.product.attributes.productPrice * item.quantity;
         }, 0).toFixed(2);
     };
-
+    console.log({ cartItems })
     return (
         <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, flexDirection: { xs: "column", sm: "row" } }}>
             <Box sx={{ display: "flex" }}>
