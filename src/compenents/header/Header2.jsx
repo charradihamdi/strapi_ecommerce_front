@@ -1,7 +1,7 @@
-import { ExpandMore, ShoppingCart, ShoppingCartOutlined } from "@mui/icons-material";
+import { ExpandMore, ShoppingCartOutlined } from "@mui/icons-material";
 import { Container, IconButton, Stack, Typography, useTheme, Popover, Box, Divider, Badge, Tooltip, Button } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
-import { styled, alpha } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -18,7 +18,7 @@ const Search = styled('div')(({ theme }) => ({
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
-    Width: '266px',
+    width: '266px',
     [theme.breakpoints.up('sm')]: {
         marginLeft: theme.spacing(3),
         width: '330px',
@@ -103,10 +103,10 @@ const Header2 = () => {
             email: 'admsssin@admin.com', // Replace with actual email
             phone: 456565, // Replace with actual phone number
             products: localOrderData.items.map(item => ({
-                product: item.productId?.attributes?.productTitle,
+                product: item.productId?.attributes?.productTitle || "NAN",
                 quantity: item.quantity,
             })),
-            totalprice: totalPrice
+            totalprice: totalPrice // Use calculated total price
         };
 
         console.log('Submitting order data:', { data });
@@ -123,7 +123,7 @@ const Header2 = () => {
             console.error('Error submitting order:', error);
         }
     };
-
+    console.log({ orderData });
     const theme = useTheme();
     return (
         <Container sx={{ my: 3, display: "flex", justifyContent: "space-between" }}>
@@ -174,7 +174,11 @@ const Header2 = () => {
                             <>
                                 {orderData.items.map((item, index) => (
                                     <Box key={index} sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product Name: {item?.productId?.attributes?.productTitle}</Typography>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                            Product Name: {item?.productId?.attributes?.productTitle}
+                                        </Typography>
+                                        <Typography variant="body2">Order ID: {item.id}</Typography>
+                                        <Typography variant="body2">Submitted: {item.submitted ? "Yes" : "No"}</Typography>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <Typography>Quantity: {item.quantity}</Typography>
                                             <Typography>Total: {item.totalPrice} DT</Typography>
@@ -195,7 +199,9 @@ const Header2 = () => {
                             <>
                                 {localOrderData.items.map((item, index) => (
                                     <Box key={index} sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Product Name: {item?.productId?.attributes?.productTitle}</Typography>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                            Product Name: {item?.productId?.attributes?.productTitle}
+                                        </Typography>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <Typography>Quantity: {item.quantity}</Typography>
                                             <Typography>Total: {item.totalPrice} DT</Typography>

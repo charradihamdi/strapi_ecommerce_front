@@ -73,19 +73,10 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
                     totalPrice: (item.product.attributes.productPrice * item.quantity).toFixed(2)
                 }))
             };
-
-            // {"data":{
-            //     "username": "zear",
-            //     "email": "admsssin@admin.com",
-            //     "phone": 456565,
-            //     "products":[{
-            //         "product":"sqdfqsdf",
-            //         "quantity":4
-            //     }]
-            // }}
         }
 
         localStorage.setItem('orderData', JSON.stringify(orderData));
+        window.location.reload();
 
     };
 
