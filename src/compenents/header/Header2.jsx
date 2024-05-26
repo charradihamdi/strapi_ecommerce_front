@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Container, IconButton, Stack, Typography, Popover, Box, Divider, Badge, Tooltip, Button, Paper, Grid } from "@mui/material";
-import { ShoppingCartOutlined } from "@mui/icons-material";
-import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { Container, IconButton, Stack, Typography, Popover, Box, Badge, Tooltip, Button, Paper } from "@mui/material";
+import { ShoppingCartOutlined, Person2Outlined, ShoppingCart } from "@mui/icons-material";
 import axios from 'axios';
 
 const Header2 = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const [orderData, setOrderData] = useState(null);
     const [existingOrder, setExistingOrder] = useState([]);
     const [localOrderData, setLocalOrderData] = useState(null);
+    const [view, setView] = useState('new'); // 'new' or 'history'
 
     useEffect(() => {
         // Retrieve local order data from local storage when component mounts
@@ -39,7 +37,7 @@ const Header2 = () => {
         if (localOrderData) {
             fetchOrderData();
         }
-    }, [localOrderData]); // Dependency array ensures fetchOrderData is called after localOrderData is set
+    }, [localOrderData]);
 
     const handlePopoverOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -60,8 +58,8 @@ const Header2 = () => {
 
         const data = {
             username: 'zear',
-            email: localOrderData.user.email, // Use actual email from localOrderData
-            phone: localOrderData.user.phoneNumber, // Use actual phone number from localOrderData
+            email: localOrderData.user.email,
+            phone: localOrderData.user.phoneNumber,
             products: localOrderData.items.map(item => ({
                 product: item.productId.attributes?.productTitle || "NAN",
                 quantity: item.quantity,
@@ -77,13 +75,8 @@ const Header2 = () => {
             if (response.status === 200) {
                 console.log('Order placed successfully:', response.data);
 
-                // Remove products list from local storage
-                const storedLocalOrderData = localStorage.getItem('orderData');
-                if (storedLocalOrderData) {
-                    const parsedData = JSON.parse(storedLocalOrderData);
-                    parsedData.items = []; // Remove products list
-                    localStorage.setItem('orderData', JSON.stringify(parsedData));
-                }
+                // Clear local storage
+                localStorage.removeItem('orderData');
 
                 // Refresh the page
                 window.location.reload();
@@ -95,19 +88,21 @@ const Header2 = () => {
         }
     };
 
-
+    const toggleView = (newView) => {
+        setView(newView);
+    };
 
     return (
-        <Container sx={{ my: 3, display: "flex", justifyContent: "space-between" }}>
+        <Container sx={{ my: 4, display: "flex", justifyContent: "space-between" }}>
             <Stack alignItems={"center"}>
                 <ShoppingCartOutlined />
-                <Typography variant="body2">Clean City</Typography>
+                <Typography variant="h6">Clean City</Typography>
             </Stack>
 
             <Stack direction={"row"} alignItems={"center"}>
                 <Tooltip title="Order Information" arrow>
                     <IconButton>
-                        <Person2OutlinedIcon />
+                        <Person2Outlined />
                     </IconButton>
                 </Tooltip>
                 <IconButton
@@ -115,8 +110,8 @@ const Header2 = () => {
                     onMouseEnter={handlePopoverOpen}
                     onMouseLeave={handlePopoverClose}
                 >
-                    <Badge badgeContent={(orderData?.items?.length || 0) + (localOrderData?.items?.length || 0)} color="primary">
-                        <ShoppingCartIcon />
+                    <Badge badgeContent={(localOrderData?.items?.length || 0)} color="primary">
+                        <ShoppingCart />
                     </Badge>
                 </IconButton>
             </Stack>
@@ -138,37 +133,47 @@ const Header2 = () => {
                 onMouseEnter={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
             >
-                <Box sx={{ p: 1, width: 300 }}>
-                    <Typography variant="h6">Order Summary</Typography>
+                <Box sx={{ p: 2, width: 300 }}>
+                    <Typography variant="h6" sx={{ mb: 2 }}>Order Summary</Typography>
 
-                    {/* Existing Orders */}
-                    <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Orders History</Typography>
-                        {existingOrder.map(order => (
-                            <Paper key={order.id} elevation={2} sx={{ p: 2, mt: 1 }}>
-                                <Typography variant="body2">Order ID: {order.id}</Typography>
-                                <Typography variant="body2" sx={{ color: order.submitted ? 'green' : 'inherit' }}>Status: {order.submitted ? "Packed" : "Unpacked"}</Typography>
-                                <Typography variant="body2">Total: {order.totalprice} DT</Typography>
-                            </Paper>
-                        ))}
-
+                    {/* Switcher */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                        <Button onClick={() => toggleView('new')} variant={view === 'new' ? "contained" : "outlined"} color="primary" sx={{ mr: 1 }}>New Orders</Button>
+                        <Button onClick={() => toggleView('history')} variant={view === 'history' ? "contained" : "outlined"} color="primary" sx={{ ml: 1 }}>Order History</Button>
                     </Box>
 
-                    {/* New Orders */}
-                    <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>New Orders</Typography>
-                        {localOrderData?.items && localOrderData.items.map((item, index) => (
-                            <Paper key={index} elevation={2} sx={{ p: 2, mt: 1 }}>
-                                <Typography variant="body2">Product Name: {item?.productId?.attributes?.productTitle}</Typography>
-                                <Typography variant="body2">Quantity: {item.quantity}</Typography>
-                                <Typography variant="body2">Total: {item.totalPrice} DT</Typography>
-                            </Paper>
-                        ))}
-                    </Box>
+                    {/* Orders */}
+                    <Box>
+                        {view === 'new' && (
+                            <>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>New Orders</Typography>
+                                {localOrderData?.items && localOrderData.items.map((item, index) => (
+                                    <Paper key={index} elevation={2} sx={{ p: 2, mt: 1 }}>
+                                        <Typography variant="body2">Product Name: {item?.productId?.attributes?.productTitle}</Typography>
+                                        <Typography variant="body2">Quantity: {item.quantity}</Typography>
+                                        <Typography variant="body2">Total: {item.totalPrice} DT</Typography>
+                                    </Paper>
+                                ))}
+                                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                                    {localOrderData?.items && <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>}
+                                </Box>
+                            </>
+                        )}
+                        {view === 'history' && (
+                            <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                <>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Order History</Typography>
+                                    {existingOrder.map(order => (
+                                        <Paper key={order.id} elevation={2} sx={{ p: 2, mt: 1 }}>
+                                            <Typography variant="body2">Order ID: {order.id}</Typography>
+                                            <Typography variant="body2" sx={{ color: order.submitted ? 'green' : 'inherit' }}>Status: {order.submitted ? "Packed" : "Unpacked"}</Typography>
+                                            <Typography variant="body2">Total: {order.totalprice} DT</Typography>
+                                        </Paper>
+                                    ))}
+                                </>
+                            </Box>
+                        )}
 
-                    {/* Submit Button */}
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        {localOrderData?.items && <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>}
                     </Box>
                 </Box>
             </Popover>
