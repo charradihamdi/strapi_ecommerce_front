@@ -56,6 +56,7 @@ const Header2 = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [orderData, setOrderData] = useState(null);
+    const [existingOrder, setExistingOrder] = useState(null);
     const [localOrderData, setLocalOrderData] = useState(null);
 
     useEffect(() => {
@@ -64,21 +65,6 @@ const Header2 = () => {
         if (storedLocalOrderData) {
             setLocalOrderData(JSON.parse(storedLocalOrderData));
         }
-
-        // Fetch order data from server
-        const fetchOrderData = async () => {
-            try {
-                const email = 'charradihamdi1@gmail.com'; // Replace with the actual email address
-                const response = await axios.get(`http://localhost:5555/api/baskets/email/${email}`);
-                if (response.data && response.data.status !== undefined) {
-                    setOrderData(response.data);
-                }
-            } catch (error) {
-                console.error('Error fetching order data:', error);
-            }
-        };
-
-        fetchOrderData();
     }, []);
 
     const handlePopoverOpen = (event) => {
@@ -89,21 +75,20 @@ const Header2 = () => {
     const handlePopoverClose = () => {
         setPopoverOpen(false);
     };
-
     const handleOrderSubmit = async () => {
         if (!localOrderData || !localOrderData.items || localOrderData.items.length === 0) {
             console.error('No local orders to submit');
             return;
         }
 
-        const totalPrice = localOrderData.items.reduce((sum, item) => sum + item.totalPrice, 0);
+        const totalPrice = localOrderData.items.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
 
         const data = {
             username: 'zear', // Replace with actual username
-            email: 'admsssin@admin.com', // Replace with actual email
-            phone: 456565, // Replace with actual phone number
+            email: localOrderData.user.email, // Use actual email from localOrderData
+            phone: localOrderData.user.phoneNumber, // Use actual phone number from localOrderData
             products: localOrderData.items.map(item => ({
-                product: item.productId?.attributes?.productTitle || "NAN",
+                product: item.productId.attributes?.productTitle || "NAN",
                 quantity: item.quantity,
             })),
             totalprice: totalPrice // Use calculated total price
@@ -114,8 +99,19 @@ const Header2 = () => {
         try {
             const response = await axios.post('http://localhost:5555/api/baskets', { data });
 
-            if (response.status === 201) {
+            if (response.status === 200) {
                 console.log('Order placed successfully:', response.data);
+
+                // Remove products list from local storage
+                const storedLocalOrderData = localStorage.getItem('orderData');
+                if (storedLocalOrderData) {
+                    const parsedData = JSON.parse(storedLocalOrderData);
+                    parsedData.items = []; // Remove products list
+                    localStorage.setItem('orderData', JSON.stringify(parsedData));
+                }
+
+                // Refresh the page
+                window.location.reload();
             } else {
                 console.error('Failed to place order:', response.statusText);
             }
@@ -123,102 +119,115 @@ const Header2 = () => {
             console.error('Error submitting order:', error);
         }
     };
-    console.log({ orderData });
+
+
+
+    useEffect(() => {
+        // Fetch order data from server if user email is available
+        const fetchOrderData = async () => {
+            try {
+                const email = localOrderData?.user?.email; // Get email from localOrderData
+                if (email) {
+                    const response = await axios.get(`http://localhost:5555/api/baskets/email/${email}`);
+                    if (response.data) {
+                        setExistingOrder(response.data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching order data:', error);
+            }
+        };
+
+        if (localOrderData) {
+            fetchOrderData();
+        }
+    }, [localOrderData]); // Dependency array ensures fetchOrderData is called after localOrderData is set
+
     const theme = useTheme();
+
     return (
         <Container sx={{ my: 3, display: "flex", justifyContent: "space-between" }}>
-            <>
-                <Stack alignItems={"center"}>
-                    <ShoppingCartOutlined />
-                    <Typography variant="body2">Clean City</Typography>
-                </Stack>
+            <Stack alignItems={"center"}>
+                <ShoppingCartOutlined />
+                <Typography variant="body2">Clean City</Typography>
+            </Stack>
 
-                <Stack direction={"row"} alignItems={"center"}>
-                    <Tooltip title="Order Information" arrow>
-                        <IconButton>
-                            <Person2OutlinedIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <IconButton
-                        aria-label="cart"
-                        onMouseEnter={handlePopoverOpen}
-                        onMouseLeave={handlePopoverClose}
-                    >
-                        <Badge badgeContent={(orderData?.items?.length || 0) + (localOrderData?.items?.length || 0)} color="primary">
-                            <ShoppingCartIcon />
-                        </Badge>
+            <Stack direction={"row"} alignItems={"center"}>
+                <Tooltip title="Order Information" arrow>
+                    <IconButton>
+                        <Person2OutlinedIcon />
                     </IconButton>
-                </Stack>
-
-                <Popover
-                    sx={{ marginTop: 7 }}
-                    open={popoverOpen}
-                    anchorEl={anchorEl}
-                    onClose={handlePopoverClose}
-                    anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    disableRestoreFocus
+                </Tooltip>
+                <IconButton
+                    aria-label="cart"
                     onMouseEnter={handlePopoverOpen}
                     onMouseLeave={handlePopoverClose}
                 >
-                    <Box sx={{ p: 1, width: 300 }}>
-                        <Typography variant="h6">Order Summary</Typography>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Existing Orders</Typography>
-                        {orderData?.items ? (
-                            <>
-                                {orderData.items.map((item, index) => (
-                                    <Box key={index} sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                            Product Name: {item?.productId?.attributes?.productTitle}
-                                        </Typography>
-                                        <Typography variant="body2">Order ID: {item.id}</Typography>
-                                        <Typography variant="body2">Submitted: {item.submitted ? "Yes" : "No"}</Typography>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <Typography>Quantity: {item.quantity}</Typography>
-                                            <Typography>Total: {item.totalPrice} DT</Typography>
-                                        </Box>
-                                        <Divider sx={{ my: 1 }} />
-                                    </Box>
-                                ))}
-                                <Typography variant="body2">Email: {orderData.user.email}</Typography>
-                                <Typography variant="body2">Phone: {orderData.user.phoneNumber}</Typography>
-                                <Typography variant="body2">City: {orderData.user.city}</Typography>
-                            </>
-                        ) : (
-                            <Typography variant="body2">No existing orders found.</Typography>
-                        )}
+                    <Badge badgeContent={(orderData?.items?.length || 0) + (localOrderData?.items?.length || 0)} color="primary">
+                        <ShoppingCartIcon />
+                    </Badge>
+                </IconButton>
+            </Stack>
 
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>New Orders</Typography>
-                        {localOrderData?.items ? (
-                            <>
-                                {localOrderData.items.map((item, index) => (
-                                    <Box key={index} sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                            Product Name: {item?.productId?.attributes?.productTitle}
-                                        </Typography>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <Typography>Quantity: {item.quantity}</Typography>
-                                            <Typography>Total: {item.totalPrice} DT</Typography>
-                                        </Box>
-                                        <Divider sx={{ my: 1 }} />
+            <Popover
+                sx={{ marginTop: 7 }}
+                open={popoverOpen}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                disableRestoreFocus
+                onMouseEnter={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+            >
+                <Box sx={{ p: 1, width: 300 }}>
+                    <Typography variant="h6">Order Summary</Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Existing Orders</Typography>
+                    {existingOrder ? (
+                        <>
+                            <Box key={existingOrder.id} sx={{ mb: 2 }}>
+                                <Typography variant="body2">Order ID: {existingOrder.id}</Typography>
+                                <Typography variant="body2">status: {existingOrder.submitted ? "packed" : "un_packed"}</Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <Typography>Total: {existingOrder.totalprice} DT</Typography>
+                                </Box>
+                                <Divider sx={{ my: 1 }} />
+                            </Box>
+                        </>
+                    ) : (
+                        <Typography variant="body2">No existing orders found.</Typography>
+                    )}
+
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>New Orders</Typography>
+                    {localOrderData?.items ? (
+                        <>
+                            {localOrderData.items.map((item, index) => (
+                                <Box key={index} sx={{ mb: 2 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                        Product Name: {item?.productId?.attributes?.productTitle}
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Typography>Quantity: {item.quantity}</Typography>
+                                        <Typography>Total: {item.totalPrice} DT</Typography>
                                     </Box>
-                                ))}
-                            </>
-                        ) : (
-                            <Typography variant="body2">No local orders found.</Typography>
-                        )}
-                    </Box>
-                    <Box sx={{ p: 1 }}>
-                        <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>
-                    </Box>
-                </Popover>
-            </>
+                                    <Divider sx={{ my: 1 }} />
+                                </Box>
+                            ))}
+                        </>
+                    ) : (
+                        <Typography variant="body2">No local orders found.</Typography>
+                    )}
+                </Box>
+                <Box sx={{ p: 1 }}>
+                    <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>
+                </Box>
+            </Popover>
         </Container>
     );
 };
