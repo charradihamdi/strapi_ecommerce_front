@@ -51,8 +51,45 @@ const Header2 = () => {
     };
 
     const handleOrderSubmit = async () => {
-        // Your order submission logic here
+        if (!localOrderData || !localOrderData.items || localOrderData.items.length === 0) {
+            console.error('No local orders to submit');
+            return;
+        }
+
+        const totalPrice = localOrderData.items.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
+
+        const data = {
+            username: 'zear', // Replace with actual username
+            email: localOrderData.user.email, // Use actual email from localOrderData
+            phone: localOrderData.user.phoneNumber, // Use actual phone number from localOrderData
+            products: localOrderData.items.map(item => ({
+                product: item.productId.attributes?.productTitle || "NAN",
+                quantity: item.quantity,
+            })),
+            totalprice: totalPrice
+        };
+
+        console.log('Submitting order data:', { data });
+
+        try {
+            const response = await axios.post('http://localhost:5555/api/baskets', { data });
+
+            if (response.status === 200) {
+                console.log('Order placed successfully:', response.data);
+
+                // Clear local order data from local storage
+                localStorage.removeItem('orderData');
+
+                // Refresh the page
+                window.location.reload();
+            } else {
+                console.error('Failed to place order:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error submitting order:', error);
+        }
     };
+
 
     return (
         <Container sx={{ my: 3, display: "flex", justifyContent: "space-between" }}>
