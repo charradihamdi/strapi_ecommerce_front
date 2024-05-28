@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, IconButton, Stack, Typography, Popover, Box, Badge, Tooltip, Button, Paper } from "@mui/material";
-import { ShoppingCartOutlined, Person2Outlined, ShoppingCart } from "@mui/icons-material";
+import { ShoppingCartOutlined, Person2Outlined, ShoppingCart, Delete } from "@mui/icons-material";
 import axios from 'axios';
 
 const Header2 = () => {
@@ -93,6 +93,20 @@ const Header2 = () => {
         }
     };
 
+    const handleDeleteOrder = async (orderId) => {
+        try {
+            const response = await axios.delete(`http://localhost:5555/api/baskets/delete/${orderId}`);
+            if (response.status === 200) {
+                console.log('Order deleted successfully:', response.data);
+                // Update local order list after deletion
+                setExistingOrder(existingOrder.filter(order => order.id !== orderId));
+            } else {
+                console.error('Failed to delete order:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error deleting order:', error);
+        }
+    };
 
     const toggleView = (newView) => {
         setView(newView);
@@ -141,24 +155,7 @@ const Header2 = () => {
             >
                 <Box sx={{ p: 2, width: 300 }}>
                     <Typography variant="h6" sx={{ mb: 2 }}>Order Summary</Typography>
-
-
                     <Box>
-                        {/* {view === 'new' && (
-                            <>
-                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>New Orders</Typography>
-                                {localOrderData?.items && localOrderData.items.map((item, index) => (
-                                    <Paper key={index} elevation={2} sx={{ p: 2, mt: 1 }}>
-                                        <Typography variant="body2">Product Name: {item?.productId?.attributes?.productTitle}</Typography>
-                                        <Typography variant="body2">Quantity: {item.quantity}</Typography>
-                                        <Typography variant="body2">Total: {item.totalPrice} DT</Typography>
-                                    </Paper>
-                                ))}
-                                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                                    {localOrderData?.items && <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>}
-                                </Box>
-                            </>
-                        )} */}
                         {view === 'new' && (
                             <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                                 <>
@@ -166,14 +163,24 @@ const Header2 = () => {
                                     {existingOrder.map(order => (
                                         <Paper key={order.id} elevation={2} sx={{ p: 2, mt: 1 }}>
                                             <Typography variant="body2">Order ID: {order.id}</Typography>
-                                            <Typography variant="body2" sx={{ color: order.submitted ? 'green' : 'inherit' }}>Status: {order.submitted ? "Packed" : "Unpacked"}</Typography>
+                                            <Typography variant="body2" sx={{ color: order.submitted ? 'green' : 'red', fontWeight: order.submitted ? 'bold' : 'bold' }}>
+                                                Status: {order.submitted ? "Packed" : "Unpacked"}
+                                            </Typography>
                                             <Typography variant="body2">Total: {order.totalprice} DT</Typography>
+                                            <Button
+                                                variant="outlined"
+                                                color="secondary"
+                                                startIcon={<Delete />}
+                                                onClick={() => handleDeleteOrder(order.id)}
+                                                sx={{ mt: 1 }}
+                                            >
+                                                Delete Order
+                                            </Button>
                                         </Paper>
                                     ))}
                                 </>
                             </Box>
                         )}
-
                     </Box>
                 </Box>
             </Popover>
