@@ -160,11 +160,11 @@ const Header2 = () => {
                             <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                                 <>
                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Orders</Typography>
-                                    {existingOrder.map(order => (
+                                    {existingOrder.filter(order => !order.submitted).map(order => (
                                         <Paper key={order.id} elevation={2} sx={{ p: 2, mt: 1 }}>
                                             <Typography variant="body2">Order ID: {order.id}</Typography>
-                                            <Typography variant="body2" sx={{ color: order.submitted ? 'green' : 'red', fontWeight: order.submitted ? 'bold' : 'bold' }}>
-                                                Status: {order.submitted ? "Packed" : "Unpacked"}
+                                            <Typography variant="body2" sx={{ color: 'red', fontWeight: 'bold' }}>
+                                                Status: Unpacked
                                             </Typography>
                                             <Typography variant="body2">Total: {order.totalprice} DT</Typography>
                                             <Button
@@ -178,6 +178,7 @@ const Header2 = () => {
                                             </Button>
                                         </Paper>
                                     ))}
+
                                 </>
                             </Box>
                         )}
