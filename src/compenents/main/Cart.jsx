@@ -3,7 +3,7 @@ import { Box, Typography, Button, Divider, TextField, Alert } from '@mui/materia
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import axios from 'axios';
 
-const Cart = ({ cartItems, handleUserInformationSubmit }) => {
+const Cart = ({ cartItems }) => {
     const [userInfo, setUserInfo] = useState({
         email: '',
         phoneNumber: '',
@@ -11,6 +11,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
     });
     const [error, setError] = useState('');
     const [isUserInfoPresent, setIsUserInfoPresent] = useState(false);
+    const [localOrderData, setLocalOrderData] = useState(null);
 
     useEffect(() => {
         // Retrieve existing user information from local storage
@@ -19,6 +20,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
             const parsedOrderData = JSON.parse(storedOrderData);
             setUserInfo(parsedOrderData.user);
             setIsUserInfoPresent(true);
+            setLocalOrderData(parsedOrderData);
         }
     }, []);
 
@@ -30,7 +32,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
         }));
     };
 
-    const handlePlaceOrder = async () => {
+    const handlePlaceAndSubmitOrder = async () => {
         if (!userInfo.email || !userInfo.phoneNumber || !userInfo.city) {
             setError('All fields are required.');
             return;
@@ -78,7 +80,51 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
         }
 
         localStorage.setItem('orderData', JSON.stringify(orderData));
-        window.location.reload();
+        setLocalOrderData(orderData);
+
+        // Submit the order to the server
+        if (!orderData || !orderData.items || orderData.items.length === 0) {
+            console.error('No local orders to submit');
+            return;
+        }
+
+        const totalPrice = orderData.items.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
+
+        const data = {
+            username: 'zear',
+            email: orderData.user.email,
+            phone: orderData.user.phoneNumber,
+            products: orderData.items.map(item => ({
+                product: item.productId.attributes?.productTitle || "NAN",
+                quantity: item.quantity,
+            })),
+            totalprice: totalPrice
+        };
+
+        console.log('Submitting order data:', { data });
+
+        try {
+            const response = await axios.post('http://localhost:5555/api/baskets', { data });
+
+            if (response.status === 200) {
+                console.log('Order placed successfully:', response.data);
+
+                // Remove products list from local storage
+                const storedLocalOrderData = localStorage.getItem('orderData');
+                if (storedLocalOrderData) {
+                    const parsedData = JSON.parse(storedLocalOrderData);
+                    parsedData.items = []; // Remove products list
+                    localStorage.setItem('orderData', JSON.stringify(parsedData));
+                }
+
+                // Refresh the page
+                window.location.reload();
+            } else {
+                console.error('Failed to place order:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error submitting order:', error);
+        }
     };
 
     const calculateTotalPrice = () => {
@@ -119,7 +165,7 @@ const Cart = ({ cartItems, handleUserInformationSubmit }) => {
                     {error}
                 </Alert>
             )}
-            <Button onClick={handlePlaceOrder} variant="contained" sx={{ mr: 1 }}>Place Order</Button>
+            <Button onClick={handlePlaceAndSubmitOrder} variant="contained" color="primary">Place Order</Button>
         </Box>
     );
 };

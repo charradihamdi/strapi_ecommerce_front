@@ -142,15 +142,9 @@ const Header2 = () => {
                 <Box sx={{ p: 2, width: 300 }}>
                     <Typography variant="h6" sx={{ mb: 2 }}>Order Summary</Typography>
 
-                    {/* Switcher */}
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                        <Button onClick={() => toggleView('new')} variant={view === 'new' ? "contained" : "outlined"} color="primary" sx={{ mr: 1 }}>New Orders</Button>
-                        <Button onClick={() => toggleView('history')} variant={view === 'history' ? "contained" : "outlined"} color="primary" sx={{ ml: 1 }}>Order History</Button>
-                    </Box>
 
-                    {/* Orders */}
                     <Box>
-                        {view === 'new' && (
+                        {/* {view === 'new' && (
                             <>
                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>New Orders</Typography>
                                 {localOrderData?.items && localOrderData.items.map((item, index) => (
@@ -164,11 +158,11 @@ const Header2 = () => {
                                     {localOrderData?.items && <Button variant="contained" color="primary" onClick={handleOrderSubmit}>Submit Order</Button>}
                                 </Box>
                             </>
-                        )}
-                        {view === 'history' && (
+                        )} */}
+                        {view === 'new' && (
                             <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                                 <>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Order History</Typography>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Orders</Typography>
                                     {existingOrder.map(order => (
                                         <Paper key={order.id} elevation={2} sx={{ p: 2, mt: 1 }}>
                                             <Typography variant="body2">Order ID: {order.id}</Typography>
