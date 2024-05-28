@@ -95,7 +95,7 @@ const Header2 = () => {
 
     const handleDeleteOrder = async (orderId) => {
         try {
-            const response = await axios.delete(`http://localhost:5555/api/baskets/delete/${orderId}`);
+            const response = await axios.delete(`http://localhost:5555/api/baskets/${orderId}`);
             if (response.status === 200) {
                 console.log('Order deleted successfully:', response.data);
                 // Update local order list after deletion
