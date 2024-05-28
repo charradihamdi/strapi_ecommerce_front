@@ -100,6 +100,8 @@ const Header2 = () => {
                 console.log('Order deleted successfully:', response.data);
                 // Update local order list after deletion
                 setExistingOrder(existingOrder.filter(order => order.id !== orderId));
+                window.location.reload();
+
             } else {
                 console.error('Failed to delete order:', response.statusText);
             }
